@@ -17,18 +17,28 @@ client.connect(port, host, () => {
 const rl = readline.createInterface({input: process.stdin, output: process.stdout });
 
     client.on('data', (data) => {
-        console.log(data.toString());
-        if(data.toString() != "Wrong username")
+        if(data.toString() == "menu" ) {
             Menu();
-        
+        }
+        else if (data.toString() == "No username match"){
+            rl.close();
+            console.log(data.toString());
+
+        }
+        else {
+            console.log("\n" + data.toString() + "\n");
+        }
     });
 
-    rl.question("Enter your username \n", (name) => {
-        client.write("USER " + name);
+    rl.question("Enter your username\n", (name) => {
+        client.write("FIRSTCONNECTION " + name);
     });
 
     rl.on('line', (data) => {
         client.write(data);
+        if (data == "QUIT"){
+            rl.close();
+        }
     })
 
 
@@ -46,41 +56,3 @@ function Menu() {
 }
 
 
-
-    
-        // rl.question("What do you want to do ?", (data) => {
-        //     client.write(data);
-        // })
-    
-
-    
-    
-    // rl.prompt("What is your password ? \n", (pswrd) => {
-    //     client.write("PSWRD " + pswrd);
-    //     rl.close();
-    // })
-
-    
-   
-
-
-
-
-// client.on('data', (data) => {
-//     console.log(data.toString());
-// });
-
-
-
-
-
-// client.connect(/* port */5000,/*host*/'127.0.0.1',/* event listener */ () => {
-//     console.log('connected')
-//     client.write(/* Buffer */ "Hello from client")
-
-// })
-
-// client.on(/* event */ 'data',/* listener */ (data) => {
-//     console.log(data.toString());
-
-// })
