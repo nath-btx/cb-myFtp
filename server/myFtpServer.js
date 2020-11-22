@@ -1,4 +1,5 @@
 /////////////////
+
 const port = process.argv[2];
 
 const path = require('path');
@@ -7,7 +8,7 @@ const net = require('net');
 const fs = require('fs');
 var user = "";
 
-const file = JSON.parse(fs.readFileSync('users.json','utf-8'));
+const file = JSON.parse(fs.readFileSync('../users.json','utf-8'));
 
 if (!port) {
     console.log("usage : node myFtpServer.js <PORT>");
@@ -23,12 +24,11 @@ const server = net.createServer( (socket) => {
 
     socket.on('data', (data) => {
 
-        console.log("received: " + data);
-        
         const [directive,  parameter] = data.toString().split(" ");
 
-        console.log("directive: " + directive);
-        console.log("parameter: " + parameter )
+        // console.log("received: " + data);
+        // console.log("directive: " + directive);
+        // console.log("parameter: " + parameter )
 
         
         switch(directive) {
@@ -40,7 +40,6 @@ const server = net.createServer( (socket) => {
                 })
                 if (i > 0) {
                     socket.write('Successfully connected');
-                    socket.write("menu");
                 }
                 else {
                     socket.write("No username match");
@@ -49,10 +48,15 @@ const server = net.createServer( (socket) => {
                     user = parameter;
                     break;
             case 'USER':
+                if (!parameter){
+                    socket.write("Usage : USER <name>");
+                    break;
+                }
+                else {
                 var i = 0;
                 file.forEach(element => {
-                    console.log(element.name);
-                    console.log(parameter);
+                    // console.log(element.name);
+                    // console.log(parameter);
                     if (element.name == parameter)
                         i++;
                 })
@@ -62,86 +66,95 @@ const server = net.createServer( (socket) => {
                 else {
                     socket.write("Username does not match");
                 }
-                    socket.write("menu");
-                    break;
-                
+                break;
+            }
             case 'PASS':
+                if (!parameter){
+                    socket.write("Usage : USER <name>");
+                    break;
+                }
+                else {
                 var i = 0;
-                console.log("user : " + user);
+                // console.log("user : " + user);
                 file.forEach(element => {
                     if (element.password == parameter && element.name == user)
                         i++;
                 })
                 if (i > 0){
                     socket.write("You've been authenticated");
-                    socket.write("menu");
                 }
                 else{
-                    socket.write("Wrong password\n");
-                    socket.write("menu");
+                    socket.write("Wrong password");
                 }
-
-                
-                // check password
-                // if true
                 break;
+            }
             
             case 'LIST':
+                var send = "";
+
                 fs.readdir(process.cwd(), (err, files) => {
-                    files.forEach(file => {
-                      socket.write(file + "\n");
+                    files.forEach(file => { 
+                      send += "\n" + file;
                     });
+                    socket.write(send);
                   });
-                socket.write("menu");
                 break;
             case 'CWD':
                 break;
             case 'RETR':
-                duplicate(parameter);
+                // Il faut vérifier que le fichier existe
+                if (!parameter){
+                    socket.write("Usage : RETR <file url>");
+                    break;
+                }
+                else {
+                duplicate(parameter, directive);
                 socket.write("File duplicated correctly");
-                socket.write("menu");
                 break;
+                }
             case 'STOR':
-                duplicate(parameter);
+                if (!parameter){
+                    socket.write("Usage : STOR <file url>");
+                    break;
+                }
+                else {
+                duplicate(parameter, directive);
                 socket.write("File duplicated correctly");
-                socket.write("menu");
                 break;
+                }
             case 'PWD' :
                 socket.write(process.cwd());
-                socket.write("menu");
                 break;
             case 'HELP' :
                 socket.write("User -> Checks if the user exists\nPASS -> Enter your password to connect and have access to the other commands\nLIST -> Lists the current directory of the server\nCWD  -> Changes the current directory of the server\nRETR -> Transfers a copy of the file from server to client\nSTOR -> Transfers a copy of the file from the client to the server\nPWD  -> Displays the name of the current directory of the server\nHELP -> Sends helpful information\nQUIT -> Closes the connection and stops the program");
-                socket.write("menu");
-                break;
-                
+                break; 
             case 'QUIT':
                 socket.end('Good Bye ');
                 break;
             default:
                 socket.write("Invalid command");
-                socket.write("menu");
-                break;
-                
+                break;      
         } 
-    
     });
-    
-
 });
 
 server.listen(port, () => {
     console.log("Server started on port " + port)
 });
 
-function duplicate(filename) {
-    const { name, ext } = path.parse(filename)
-  
-    const readStream = fs.createReadStream(filename)
-    const writeStream = fs.createWriteStream(`${name}.copy${ext}`)
-  
-    readStream.pipe(writeStream)
 
+function duplicate(filename, directive ) {
+    const { name, ext } = path.parse("../"+filename);
+    const readStream = fs.createReadStream("../"+filename);
+    // const writeStream = fs.createWriteStream(`${name}.copy${ext}`)
+    if (directive == "RETR"){
+        const writeStream = fs.createWriteStream(`../client/${name}.copy${ext}`);
+        readStream.pipe(writeStream);
+    }
+    else if (directive == "STOR") {
+        const writeStream = fs.createWriteStream(`../server/${name}.copy${ext}`);
+        readStream.pipe(writeStream);
+    }
   }
 
   

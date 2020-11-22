@@ -17,16 +17,16 @@ client.connect(port, host, () => {
 const rl = readline.createInterface({input: process.stdin, output: process.stdout });
 
     client.on('data', (data) => {
-        if(data.toString() == "menu" ) {
-            Menu();
-        }
-        else if (data.toString() == "No username match"){
+        if (data.toString() == "No username match"){
             rl.close();
             console.log(data.toString());
-
         }
+
         else {
             console.log("\n" + data.toString() + "\n");
+            if (data.toString() != "Good Bye"){
+            Menu()
+            }
         }
     });
 
@@ -48,7 +48,7 @@ function Menu() {
     console.log("LIST");
     console.log("CWD <directory>");
     console.log("RETR <filename>");
-    console.log("STOR : <filename>");
+    console.log("STOR <filename>");
     console.log("PWD");
     console.log("HELP");
     console.log("QUIT");
