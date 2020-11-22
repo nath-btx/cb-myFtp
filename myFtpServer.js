@@ -77,7 +77,7 @@ const server = net.createServer( (socket) => {
                     socket.write("menu");
                 }
                 else{
-                    socket.write("Wrong password");
+                    socket.write("Wrong password\n");
                     socket.write("menu");
                 }
 
@@ -98,9 +98,13 @@ const server = net.createServer( (socket) => {
                 break;
             case 'RETR':
                 duplicate(parameter);
+                socket.write("File duplicated correctly");
+                socket.write("menu");
                 break;
             case 'STOR':
                 duplicate(parameter);
+                socket.write("File duplicated correctly");
+                socket.write("menu");
                 break;
             case 'PWD' :
                 socket.write(process.cwd());
@@ -137,6 +141,7 @@ function duplicate(filename) {
     const writeStream = fs.createWriteStream(`${name}.copy${ext}`)
   
     readStream.pipe(writeStream)
+
   }
 
   

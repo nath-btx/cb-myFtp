@@ -43,7 +43,6 @@ const rl = readline.createInterface({input: process.stdin, output: process.stdou
 
 
 function Menu() {
-    console.log("What do you want to do ??");
     console.log("USER <name>");
     console.log("PASS <password>");
     console.log("LIST");
